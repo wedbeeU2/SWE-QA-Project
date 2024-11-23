@@ -1,5 +1,126 @@
 package com.stqap.swe_qa_project.service;
 
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
 public class CalculatorService {
     
+    // Mean Calculation
+    public double calculateMean(List<Double> values) {
+        if (values == null || values.isEmpty()) {
+            throw new IllegalArgumentException("Input list cannot be null or empty");
+        }
+        return values.stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElseThrow(() -> new IllegalArgumentException("Cannot calculate mean"));
+    }
+    
+    // Sample Standard Deviation
+    public double calculateSampleStandardDeviation(List<Double> values) {
+        if (values == null || values.isEmpty()) {
+            throw new IllegalArgumentException("Input list cannot be null or empty");
+        }
+        double mean = calculateMean(values);
+        double sum = values.stream()
+                .mapToDouble(value -> Math.pow(value - mean, 2))
+                .sum();
+        return Math.sqrt(sum / (values.size() - 1));
+    }
+    
+    // Population Standard Deviation
+    public double calculatePopulationStandardDeviation(List<Double> values) {
+        if (values == null || values.size() < 2) {
+            throw new IllegalArgumentException("Input list must contain at least two values");
+        }
+        double mean = calculateMean(values);
+        double sum = values.stream()
+                .mapToDouble(value -> Math.pow(value - mean, 2))
+                .sum();
+        return Math.sqrt(sum / values.size());
+    }
+    
+    // Z-Score
+    public double calculateZScore(double value, double mean, double standardDeviation) {
+        if (standardDeviation == 0) {
+            throw new IllegalArgumentException("Standard deviation cannot be zero");
+        }
+        return (value - mean) / standardDeviation;
+    }
+    
+    // Linear Regression
+    public RegressionResult calculateLinearRegression(List<String> xyPairs) {
+        List<Point> points = xyPairs.stream()
+                .map(this::parsePoint)
+                .toList();
+        
+        if (points.isEmpty()) {
+            throw new IllegalArgumentException("No valid points provided");
+        }
+        
+        double sumX = points.stream().mapToDouble(p -> p.x).sum();
+        double sumY = points.stream().mapToDouble(p -> p.y).sum();
+        double sumXY = points.stream().mapToDouble(p -> p.x * p.y).sum();
+        double sumXX = points.stream().mapToDouble(p -> p.x * p.x).sum();
+        int n = points.size();
+        
+        double slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        double intercept = (sumY - slope * sumX) / n;
+        
+        return new RegressionResult(slope, intercept);
+    }
+    
+    // Predict Y Value
+    public double predictY(double x, double slope, double intercept) {
+        return slope * x + intercept;
+    }
+    
+    // Helper method to parse x,y pairs
+    private Point parsePoint(String pair) {
+        String[] parts = pair.trim().split(",");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid point format: " + pair);
+        }
+        try {
+            double x = Double.parseDouble(parts[0].trim());
+            double y = Double.parseDouble(parts[1].trim());
+            return new Point(x, y);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid numeric values in point: " + pair);
+        }
+    }
+    
+    // Helper classes for regression
+    public static class RegressionResult {
+        private final double slope;
+        private final double intercept;
+        
+        public RegressionResult(double slope, double intercept) {
+            this.slope = slope;
+            this.intercept = intercept;
+        }
+        
+        public double getSlope() {
+            return slope;
+        }
+        
+        public double getIntercept() {
+            return intercept;
+        }
+        
+        public String getFormula() {
+            return String.format("y = %fx + %f", slope, intercept);
+        }
+    }
+    
+    private static class Point {
+        double x;
+        double y;
+        
+        Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
 }
