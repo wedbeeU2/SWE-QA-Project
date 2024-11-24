@@ -242,25 +242,17 @@
             
             try {
                 let url = `/calculate/${type}`;
-                let body;
-                
-                // Handle different input formats
-                if (type === 'zscore') {
-                    const [value, mean, stdDev] = values.split(',').map(v => v.trim());
-                    body = `value=${value}&mean=${mean}&stdDev=${stdDev}`;
-                } else if (type === 'predict-y') {
-                    const [x, slope, intercept] = values.split(',').map(v => v.trim());
-                    body = `x=${x}&slope=${slope}&intercept=${intercept}`;
-                } else {
-                    body = `values=${encodeURIComponent(values)}`;
-                }
+                let formData = new FormData();
+        
+                // Always send the raw values - let the server handle the parsing
+                formData.append('values', values);
                 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: body
+                    body: new URLSearchParams(formData)
                 });
                 
                 const result = await response.text();
@@ -321,6 +313,25 @@
             document.getElementById('result').style.display = 'none';
             document.getElementById('error').style.display = 'none';
         }
+
+        // Add helper function to update placeholder text based on operation
+        function updatePlaceholder(type) {
+            const textarea = document.getElementById('values');
+            switch(type) {
+                case 'zscore':
+                    textarea.placeholder = 'Enter three numbers separated by commas:\nvalue, mean, stdDev\nExample: 11.5, 7, 1.5811388300841898';
+                    break;
+                case 'predict-y':
+                    textarea.placeholder = 'Enter three numbers separated by commas:\nx, slope, intercept\nExample: 2.5, 2, 1';
+                    break;
+                case 'regression':
+                    textarea.placeholder = 'Enter x,y pairs, one per line:\nExample:\n1,2\n2,4\n3,6';
+                    break;
+                default:
+            textarea.placeholder = 'Enter values, one per line:\nExample:\n2\n3\n6';
+            }
+        }
+Improv
     </script>
 </body>
 </html>

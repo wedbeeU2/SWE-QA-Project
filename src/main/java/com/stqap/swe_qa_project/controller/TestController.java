@@ -69,27 +69,28 @@ public class TestController {
     
     @PostMapping("/calculate/zscore")
     @ResponseBody
-    public String calculateZScore(
-            @RequestParam String values) {
+    public String calculateZScore(@RequestParam String values) {
         try {
-            // Split the single line into three values
-            String[] parts = values.split(",");
+            // Remove any whitespace and split by comma
+            String[] parts = values.trim().split(",");
             if (parts.length != 3) {
-                return "Error: Please enter value, mean, and standard deviation separated by commas";
+                return "Error: Please enter exactly three numbers separated by commas";
             }
-            
-            double value = Double.parseDouble(parts[0].trim());
-            double mean = Double.parseDouble(parts[1].trim());
-            double stdDev = Double.parseDouble(parts[2].trim());
-            
-            if (stdDev == 0) {
-                return "Error: Standard deviation cannot be zero";
+
+            try {
+                double value = Double.parseDouble(parts[0].trim());
+                double mean = Double.parseDouble(parts[1].trim());
+                double stdDev = Double.parseDouble(parts[2].trim());
+
+                if (stdDev == 0) {
+                    return "Error: Standard deviation cannot be zero";
+                }
+
+                double result = calculatorService.calculateZScore(value, mean, stdDev);
+                return String.format("Z-Score: %.15f", result);
+            } catch (NumberFormatException e) {
+                return "Error: Please enter valid numbers";
             }
-            
-            double result = calculatorService.calculateZScore(value, mean, stdDev);
-            return String.format("Z-Score: %.4f", result);
-        } catch (NumberFormatException e) {
-            return "Error: Invalid number format. Please enter valid numbers";
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
@@ -132,20 +133,22 @@ public class TestController {
     @ResponseBody
     public String predictY(@RequestParam String values) {
         try {
-            // Split the single line into three values
-            String[] parts = values.split(",");
+            // Remove any whitespace and split by comma
+            String[] parts = values.trim().split(",");
             if (parts.length != 3) {
                 return "Error: Please enter x value, slope (m), and intercept (b) separated by commas";
             }
-            
-            double x = Double.parseDouble(parts[0].trim());
-            double slope = Double.parseDouble(parts[1].trim());
-            double intercept = Double.parseDouble(parts[2].trim());
-            
-            double result = calculatorService.predictY(x, slope, intercept);
-            return String.format("Predicted Y: %.4f", result);
-        } catch (NumberFormatException e) {
-            return "Error: Invalid number format. Please enter valid numbers";
+
+            try {
+                double x = Double.parseDouble(parts[0].trim());
+                double slope = Double.parseDouble(parts[1].trim());
+                double intercept = Double.parseDouble(parts[2].trim());
+
+                double result = calculatorService.predictY(x, slope, intercept);
+                return String.format("Predicted Y: %.15f", result);
+            } catch (NumberFormatException e) {
+                return "Error: Please enter valid numbers";
+            }
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }

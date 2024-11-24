@@ -1,23 +1,26 @@
 package com.stqap.swe_qa_project.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class CalculatorService {
     
-    // Mean Calculation
+    private static final int DECIMAL_PLACES = 15;
+    
     public double calculateMean(List<Double> values) {
         if (values == null || values.isEmpty()) {
             throw new IllegalArgumentException("Input list cannot be null or empty");
         }
-        return values.stream()
+        double mean = values.stream()
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElseThrow(() -> new IllegalArgumentException("Cannot calculate mean"));
+        return roundToDecimalPlaces(mean);
     }
     
-    // Sample Standard Deviation
     public double calculateSampleStandardDeviation(List<Double> values) {
         if (values == null || values.isEmpty()) {
             throw new IllegalArgumentException("Input list cannot be null or empty");
@@ -26,10 +29,9 @@ public class CalculatorService {
         double sum = values.stream()
                 .mapToDouble(value -> Math.pow(value - mean, 2))
                 .sum();
-        return Math.sqrt(sum / (values.size() - 1));
+        return roundToDecimalPlaces(Math.sqrt(sum / (values.size() - 1)));
     }
     
-    // Population Standard Deviation
     public double calculatePopulationStandardDeviation(List<Double> values) {
         if (values == null || values.size() < 2) {
             throw new IllegalArgumentException("Input list must contain at least two values");
@@ -38,15 +40,20 @@ public class CalculatorService {
         double sum = values.stream()
                 .mapToDouble(value -> Math.pow(value - mean, 2))
                 .sum();
-        return Math.sqrt(sum / values.size());
+        return roundToDecimalPlaces(Math.sqrt(sum / values.size()));
     }
     
-    // Z-Score
-    public double calculateZScore(double value, double mean, double standardDeviation) {
-        if (standardDeviation == 0) {
+    public double calculateZScore(double value, double mean, double stdDev) {
+        if (stdDev == 0) {
             throw new IllegalArgumentException("Standard deviation cannot be zero");
         }
-        return (value - mean) / standardDeviation;
+        return roundToDecimalPlaces((value - mean) / stdDev);
+    }
+    
+    private double roundToDecimalPlaces(double value) {
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(DECIMAL_PLACES, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
     
     // Linear Regression
