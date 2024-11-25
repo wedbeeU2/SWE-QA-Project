@@ -31,7 +31,7 @@ public class TestController {
                 return "Error: Please enter at least one value";
             }
             double result = calculatorService.calculateMean(numbers);
-            return String.format("Mean: %.4f", result);
+            return String.format("Mean: %.15f", result);
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
@@ -46,7 +46,7 @@ public class TestController {
                 return "Error: Please enter at least one value";
             }
             double result = calculatorService.calculateSampleStandardDeviation(numbers);
-            return String.format("Sample Standard Deviation: %.4f", result);
+            return String.format("Sample Standard Deviation: %.15f", result);
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
@@ -61,7 +61,7 @@ public class TestController {
                 return "Error: Please enter at least two values";
             }
             double result = calculatorService.calculatePopulationStandardDeviation(numbers);
-            return String.format("Population Standard Deviation: %.4f", result);
+            return String.format("Population Standard Deviation: %.15f", result);
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
@@ -100,19 +100,21 @@ public class TestController {
     @ResponseBody
     public String calculateRegression(@RequestParam String values) {
         try {
+            // Split input into lines and filter out empty lines
             List<String> pairs = Arrays.stream(values.split("\n"))
-                .filter(line -> !line.trim().isEmpty())
+                .map(String::trim)
+                .filter(line -> !line.isEmpty())
                 .collect(Collectors.toList());
-                
+
             if (pairs.isEmpty()) {
                 return "Error: Please enter at least one x,y pair";
             }
-            
-            // Validate each pair format
+
+            // Validate each pair
             for (String pair : pairs) {
                 String[] parts = pair.split(",");
                 if (parts.length != 2) {
-                    return "Error: Each line should contain an x,y pair separated by a comma";
+                    return "Error: Each line should contain exactly two numbers separated by a comma";
                 }
                 try {
                     Double.parseDouble(parts[0].trim());
@@ -121,9 +123,9 @@ public class TestController {
                     return "Error: Invalid number format in pair: " + pair;
                 }
             }
-            
+
             CalculatorService.RegressionResult result = calculatorService.calculateLinearRegression(pairs);
-            return String.format("Linear Regression: %s", result.getFormula());
+            return String.format("y = %.15fx + %.15f", result.getSlope(), result.getIntercept());
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
@@ -145,7 +147,7 @@ public class TestController {
                 double intercept = Double.parseDouble(parts[2].trim());
 
                 double result = calculatorService.predictY(x, slope, intercept);
-                return String.format("Predicted Y: %.15f", result);
+                return String.format("Predicted Y = %.15f", result);
             } catch (NumberFormatException e) {
                 return "Error: Please enter valid numbers";
             }

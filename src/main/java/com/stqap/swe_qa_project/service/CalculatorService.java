@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CalculatorService {
@@ -57,24 +58,50 @@ public class CalculatorService {
     }
     
     // Linear Regression
-    public RegressionResult calculateLinearRegression(List<String> xyPairs) {
-        List<Point> points = xyPairs.stream()
-                .map(this::parsePoint)
-                .toList();
+    public static class RegressionResult {
+        private final double slope;
+        private final double intercept;
         
-        if (points.isEmpty()) {
-            throw new IllegalArgumentException("No valid points provided");
+        public RegressionResult(double slope, double intercept) {
+            this.slope = slope;
+            this.intercept = intercept;
         }
         
+        public double getSlope() {
+            return slope;
+        }
+        
+        public double getIntercept() {
+            return intercept;
+        }
+        
+        public String getFormula() {
+            return String.format("y = %.15fx + %.15f", slope, intercept);
+        }
+    }
+
+    public RegressionResult calculateLinearRegression(List<String> xyPairs) {
+        if (xyPairs == null || xyPairs.isEmpty()) {
+            throw new IllegalArgumentException("No valid points provided");
+        }
+
+        List<Point> points = xyPairs.stream()
+            .map(this::parsePoint)
+            .collect(Collectors.toList());
+
         double sumX = points.stream().mapToDouble(p -> p.x).sum();
         double sumY = points.stream().mapToDouble(p -> p.y).sum();
         double sumXY = points.stream().mapToDouble(p -> p.x * p.y).sum();
         double sumXX = points.stream().mapToDouble(p -> p.x * p.x).sum();
         int n = points.size();
-        
+
         double slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
         double intercept = (sumY - slope * sumX) / n;
-        
+
+        // Round the results
+        slope = roundToDecimalPlaces(slope);
+        intercept = roundToDecimalPlaces(intercept);
+
         return new RegressionResult(slope, intercept);
     }
     
@@ -98,36 +125,14 @@ public class CalculatorService {
         }
     }
     
-    // Helper classes for regression
-    public static class RegressionResult {
-        private final double slope;
-        private final double intercept;
-        
-        public RegressionResult(double slope, double intercept) {
-            this.slope = slope;
-            this.intercept = intercept;
-        }
-        
-        public double getSlope() {
-            return slope;
-        }
-        
-        public double getIntercept() {
-            return intercept;
-        }
-        
-        public String getFormula() {
-            return String.format("y = %fx + %f", slope, intercept);
-        }
-    }
-    
     private static class Point {
         double x;
         double y;
-        
+
         Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
     }
+
 }
