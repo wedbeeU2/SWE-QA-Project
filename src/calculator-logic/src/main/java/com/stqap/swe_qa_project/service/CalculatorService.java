@@ -1,5 +1,7 @@
-package com.stqap.swe_qa_project.service;
+package com.stqap.calculatorlogic.service;
 
+import com.stqap.calculatorlogic.model.CalculationResult;
+import com.stqap.calculatorlogic.model.CalculationResult.CalculationType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.springframework.stereotype.Service;
