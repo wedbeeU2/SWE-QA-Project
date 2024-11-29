@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <groupId>com.example</groupId>
-        <artifactId>statistical-calculator</artifactId>
+        <groupId>com.stqap</groupId>
+	    <artifactId>swe-qa-project</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -14,21 +14,27 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Reference to calculator-logic module -->
         <dependency>
             <groupId>com.stqap</groupId>
-	        <artifactId>swe-qa-project</artifactId>
+            <artifactId>calculator-logic</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!-- Spring Boot Dependencies -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -37,9 +43,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>com.example.web.WebApplication</mainClass>
-                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

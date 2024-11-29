@@ -1,10 +1,10 @@
 package com.stqap.web.controller;
 
-import com.stqap.calculatorlogic.model.CalculationResult;
 import com.stqap.calculatorlogic.service.CalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,14 +22,16 @@ public class CalculatorController {
     
     @PostMapping("/calculate/{type}")
     @ResponseBody
-    public String calculate(@PathVariable String type, @RequestParam String values) {
+    public String calculate(@PathVariable("type") String type, @RequestParam("values") String values) {
         try {
             return switch (type) {
-                case "mean" -> calculatorService.calculateMean(parseValues(values)).getFormattedResult();
-                case "sample-std" -> calculatorService.calculateSampleStandardDeviation(parseValues(values)).getFormattedResult();
-                case "pop-std" -> calculatorService.calculatePopulationStandardDeviation(parseValues(values)).getFormattedResult();
+                case "mean" -> String.format("Mean: %.15f", calculatorService.calculateMean(parseValues(values)));
+                case "sample-std" -> String.format("Sample Standard Deviation: %.15f", 
+                    calculatorService.calculateSampleStandardDeviation(parseValues(values)));
+                case "pop-std" -> String.format("Population Standard Deviation: %.15f", 
+                    calculatorService.calculatePopulationStandardDeviation(parseValues(values)));
                 case "zscore" -> handleZScore(values);
-                case "regression" -> calculatorService.calculateLinearRegression(Arrays.asList(values.split("\n"))).getFormattedResult();
+                case "regression" -> calculatorService.calculateLinearRegression(Arrays.asList(values.split("\n")));
                 case "predict-y" -> handlePredictY(values);
                 default -> "Error: Unknown calculation type";
             };
@@ -47,7 +49,8 @@ public class CalculatorController {
             double value = Double.parseDouble(parts[0].trim());
             double mean = Double.parseDouble(parts[1].trim());
             double stdDev = Double.parseDouble(parts[2].trim());
-            return calculatorService.calculateZScore(value, mean, stdDev).getFormattedResult();
+            double result = calculatorService.calculateZScore(value, mean, stdDev);
+            return String.format("Z-Score: %.15f", result);
         } catch (NumberFormatException e) {
             return "Error: Invalid number format";
         }
@@ -62,7 +65,8 @@ public class CalculatorController {
             double x = Double.parseDouble(parts[0].trim());
             double slope = Double.parseDouble(parts[1].trim());
             double intercept = Double.parseDouble(parts[2].trim());
-            return calculatorService.predictY(x, slope, intercept).getFormattedResult();
+            double result = calculatorService.predictY(x, slope, intercept);
+            return String.format("Predicted Y = %.15f", result);
         } catch (NumberFormatException e) {
             return "Error: Invalid number format";
         }

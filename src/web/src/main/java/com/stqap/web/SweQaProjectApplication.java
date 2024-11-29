@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.example.web", "com.example.calculatorlogic"})
-public class WebApplication {
+@ComponentScan(basePackages = {"com.stqap.web", "com.stqap.calculatorlogic"})
+public class SweQaProjectApplication {
     public static void main(String[] args) {
-        SpringApplication.run(WebApplication.class, args);
+        SpringApplication.run(SweQaProjectApplication.class, args);
     }
 }
