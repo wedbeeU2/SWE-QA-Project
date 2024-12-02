@@ -52,6 +52,16 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                            <includes>
+                                <include>**/calculatorlogic/**/*.class</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/test/**/*.class</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>check</id>
