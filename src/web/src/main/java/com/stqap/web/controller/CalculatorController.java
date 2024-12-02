@@ -2,6 +2,9 @@ package com.stqap.web.controller;
 
 import com.stqap.web.model.CalculationModel;
 import com.stqap.web.model.CalculationResultModel;
+
+import java.text.DecimalFormat;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class CalculatorController {
     
     private final CalculationModel calculationModel;
+
+    private String formatNumber(double value) {
+        DecimalFormat df = new DecimalFormat("#.###############");
+        return df.format(value);
+    }
     
     public CalculatorController() {
         this.calculationModel = new CalculationModel();
@@ -27,17 +35,17 @@ public class CalculatorController {
         try {
             String result = switch (type) {
                 case "mean" -> 
-                    String.format("Mean: %.15f", calculationModel.performMeanCalculation(values));
+                    formatNumber(calculationModel.performMeanCalculation(values));
                 case "sample-std" -> 
-                    String.format("Sample Standard Deviation: %.15f", calculationModel.performSampleStdDev(values));
+                    formatNumber(calculationModel.performSampleStdDev(values));
                 case "pop-std" -> 
-                    String.format("Population Standard Deviation: %.15f", calculationModel.performPopulationStdDev(values));
+                    formatNumber(calculationModel.performPopulationStdDev(values));
                 case "zscore" -> 
-                    String.format("Z-Score: %.15f", calculationModel.performZScore(values));
+                    formatNumber(calculationModel.performZScore(values));
                 case "regression" ->
                     calculationModel.calculateLinearRegression(values);
                 case "predict-y" ->
-                    String.format("Predicted Y: %.15f", calculationModel.predictY(values));
+                    formatNumber(calculationModel.predictY(values));
                 default -> throw new IllegalArgumentException("Unknown calculation type");
             };
             return CalculationResultModel.success(result);

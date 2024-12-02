@@ -57,6 +57,8 @@ public class CalculationModel {
         return regression.predictY(x, slope, intercept);
     }
 
+    
+
     private List<LinearRegression.Point> parsePointInput(String input) {
         if (input == null || input.trim().isEmpty()) {
             throw new IllegalArgumentException("Input cannot be empty");

@@ -69,7 +69,7 @@ test.describe('CalculatorEndToEndTests', () => {
         await page.getByText('Compute Z Score | value, mean, stdDev on one line').click();
         
         // Assert
-        await expect(page.locator('#result')).toContainText('Z-Score: -0.490069933097155');
+        await expect(page.locator('#result')).toContainText('-0.490069933097155');
     });
 
     test('CalculatorWebUI_ComputeLinearRegression_ReturnsCorrectFormula', async ({ page }) => {

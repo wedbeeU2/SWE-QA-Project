@@ -6,7 +6,7 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            max-width: 800px;
+            max-width: 550px;
             margin: 0 auto;
         }
 
@@ -25,7 +25,7 @@
 
         .clear-button {
             background-color: #EBEBEB;
-            border: 1px solid #999;
+            border: 2px solid #999;
             padding: 5px 15px;
             cursor: pointer;
             border-radius: 5px;
@@ -47,16 +47,19 @@
         }
 
         .values-box {
+            font-family: Arial, sans-serif;
             width: 100%;
             height: 150px;
-            border: 1px solid #999;
+            border: 2px solid #999;
             margin-bottom: 20px;
             resize: vertical;
             border-radius: 5px;
+            font-size: 18px;
         }
 
         .function-section {
             margin-bottom: 20px;
+            font-size: 20px;
         }
 
         .section-header {
@@ -70,35 +73,68 @@
             margin: 5px 0;
             text-align: center;
             background-color: #EBEBEB;
-            border: 1px solid #999;
+            border: 2px solid #999;
             cursor: pointer;
-            border-radius: 2px;
-            box-sizing: border-box;
             border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 15px;
+        }
+
+        .calc-button.active {
+            background-color: #c0c0c0;
+            color: black;
+            border: 3px solid #232323;
         }
 
         .result {
+            text-align: center;
             background-color: #FFECD7;
             padding: 10px;
-            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
         .error {
-            background-color: #B70F0A;
+            text-align: center;
+            background-color: #e42622;
             color: #FFFFFF;
             padding: 10px;
-            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 18px;
         }
+
+        .error-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .error-message {
+            font-style: italic;
+        }
+        
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Calculator</h1>
-        <button onclick="clearAll()" class="clear-button">Clear</button>
+        <button onclick="setActiveButton(this); clearAll()" class="clear-button">Clear</button>
     </div>
 
-    <div id="result" class="result">Enter values below, then select an operation</div>
-    <div id="error" class="error" style="display: none;"></div>
+    <div id="result" class="result">
+        <div id="result-title" class="result-title"></div>
+        <div id="result-value">Enter values below, then select an operation</div>
+    </div>
+
+    <div id="error" class="error" style="display: none;">
+        <div class="error-title">Invalid input</div>
+        <div class="error-message" id="error-message"></div>
+    </div>
 
     <div class="values-section">
         <div class="values-label">Values</div>
@@ -107,26 +143,26 @@
 
     <div class="function-section">
         <div class="section-header">Descriptive Statistics</div>
-        <button class="calc-button" onclick="calculate('sample-std')">
+        <button class="calc-button" onclick="setActiveButton(this); calculate('sample-std')">
             Compute Sample Standard Deviation | one value per line
         </button>
-        <button class="calc-button" onclick="calculate('pop-std')">
+        <button class="calc-button" onclick="setActiveButton(this); calculate('pop-std')">
             Compute Population Standard Deviation | one value per line
         </button>
-        <button class="calc-button" onclick="calculate('mean')">
+        <button class="calc-button" onclick="setActiveButton(this); calculate('mean')">
             Compute Mean | one value per line
         </button>
-        <button class="calc-button" onclick="calculate('zscore')">
+        <button class="calc-button" onclick="setActiveButton(this); calculate('zscore')">
             Compute Z Score | value, mean, stdDev on one line
         </button>
     </div>
 
     <div class="function-section">
         <div class="section-header">Single Linear Regression</div>
-        <button class="calc-button" onclick="calculate('regression')">
+        <button class="calc-button" onclick="setActiveButton(this); calculate('regression')">
             Compute Single Linear Regression Formula | one x,y pair per line
         </button>
-        <button class="calc-button" onclick="calculate('predict-y')">
+        <button class="calc-button" onclick="setActiveButton(this); calculate('predict-y')">
             Predict Y from Linear Regression Formula | x, m, b on one line
         </button>
     </div>
@@ -134,35 +170,36 @@
     
 
     <script>
+        const operationTitles = {
+            'mean': 'Mean',
+            'sample-std': 'Sample Standard Deviation',
+            'pop-std': 'Population Standard Deviation',
+            'zscore': 'Z Score',
+            'regression': 'Single Linear Regression Formula:',
+            'predict-y': 'Single Linear Regression Prediction:'
+        };
+        
         function clearAll() {
             document.getElementById('values').value = '';
             const resultDiv = document.getElementById('result');
-            resultDiv.textContent = 'Enter values below, then select an operation';
+            const resultTitle = document.getElementById('result-title');
+            const resultValue = document.getElementById('result-value');
+            const errorDiv = document.getElementById('error');
+
+            resultTitle.textContent = '';
+            resultValue.textContent = 'Enter values below, then select an operation';
             resultDiv.style.display = 'block';
-            document.getElementById('error').style.display = 'none';
+            errorDiv.style.display = 'none';
         }
 
         function showError(message) {
-            const errorDiv = document.getElementById('error');
             const resultDiv = document.getElementById('result');
-        
-            // Only show specific error for non-numeric input
-            if (message.includes("Invalid Input, Numbers Only")) {
-                errorDiv.textContent = "Invalid Input, Numbers Only";
-            } else {
-                errorDiv.textContent = message;
-            }
-        
+            const errorDiv = document.getElementById('error');
+            const errorMessage = document.getElementById('error-message');
+
+            errorMessage.textContent = message;
             errorDiv.style.display = 'block';
             resultDiv.style.display = 'none';
-        }
-
-        function showResult(result) {
-            const resultDiv = document.getElementById('result');
-            const errorDiv = document.getElementById('error');
-            resultDiv.textContent = result;
-            resultDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
         }
 
         async function calculate(type) {
@@ -171,24 +208,67 @@
                 showError('Please enter values');
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/calculate/${type}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: {
+                       'Content-Type': 'application/x-www-form-urlencoded',
+                    },
                     body: `values=${encodeURIComponent(values)}`
                 });
-                
-                const data = await response.json();
+
+                if (!response.ok) {
+                    showError('Error communicating with server');
+                    return;
+                }
+
+                const data = await response.json(); // Parse JSON response
                 if (data.success) {
-                    showResult(data.result);
+                    showResult(operationTitles[type], data.result);
                 } else {
-                    showError(data.error);
+                    showError(data.error || 'Unknown error occurred');
                 }
             } catch (error) {
+                console.error('Error:', error);
                 showError('Failed to communicate with server');
             }
         }
+
+        function getOperationName(type) {
+            switch (type) {
+                case 'mean': return 'Mean:';
+                case 'sample-std': return 'Sample Standard Deviation';
+                case 'pop-std': return 'Population Standard Deviation';
+                case 'zscore': return 'Z Score';
+                case 'regression': return 'Single Linear Regression Formula:';
+                case 'predict-y': return 'Single Linear Regression Prediction:';
+                default: return '';
+            }
+        }
+
+        function showResult(operation, value) {
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('result-title');
+            const resultValue = document.getElementById('result-value');
+            const errorDiv = document.getElementById('error');
+
+            resultTitle.textContent = operation;
+            resultValue.textContent = value;
+            resultDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+
+        function clearActiveButton() {
+            const buttons = document.querySelectorAll('.calc-button');
+            buttons.forEach(button => button.classList.remove('active'));
+        }
+
+        function setActiveButton(button) {
+            clearActiveButton();
+            button.classList.add('active');
+        }
+        
     </script>
 </body>
 </html>
